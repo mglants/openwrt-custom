@@ -18,3 +18,8 @@
 
 # Modify hostname
 #sed -i 's/OpenWrt/P3TERX-Router/g' package/base-files/files/bin/config_generate
+cd package
+git clone https://github.com/gSpotx2f/ruantiblock_openwrt.git
+git clone https://github.com/v2rayA/v2raya-openwrt.git
+git clone https://github.com/amnezia-vpn/amneziawg-openwrt.git
+cd -
