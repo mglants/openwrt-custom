@@ -21,5 +21,6 @@
 cd package
 git clone https://github.com/gSpotx2f/ruantiblock_openwrt.git
 git clone https://github.com/v2rayA/v2raya-openwrt.git
-git clone https://github.com/mglants/awg-openwrt.git
+git clone https://github.com/openwrt-xiaomi/awg-openwrt.git
+git clone https://github.com/zerolabnet/SSClash.git
 cd -
