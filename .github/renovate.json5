@@ -4,4 +4,14 @@
     "github>bjw-s/renovate-config"
   ],
   ignorePaths: [".archive/**"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^env.sh$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\n.+\"(?<currentValue>.*?)\""
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ]
 }
