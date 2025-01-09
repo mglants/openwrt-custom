@@ -15,7 +15,8 @@ name: OpenWrt Builder ax6s stable
 on:
   repository_dispatch:
   workflow_dispatch:
-
+  push:
+    branches: [ main ]
 env:
   REPO_URL: https://github.com/openwrt/openwrt
   FEEDS_CONF: feeds.conf.default
@@ -53,7 +54,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        source ax6s/env.sh
+        source $GITHUB_WORKSPACE/ax6s/env.sh
         git clone $REPO_URL -b $OPENWRT_VERSION openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
