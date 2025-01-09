@@ -14,7 +14,8 @@
 #sed -i 's/192.168.1.1/192.168.50.5/g' package/base-files/files/bin/config_generate
 
 cd package
-git clone https://github.com/gSpotx2f/ruantiblock_openwrt.git
-git clone https://github.com/v2rayA/v2raya-openwrt.git
-git clone https://github.com/mglants/awg-openwrt.git
+git clone https://github.com/gSpotx2f/ruantiblock_openwrt.git --depth=1
+git clone https://github.com/mglants/awg-openwrt.git --depth=1
+git clone https://github.com/vernesong/OpenClash.git --depth=1
+git clone https://github.com/zerolabnet/SSClash.git --depth=1
 cd -
