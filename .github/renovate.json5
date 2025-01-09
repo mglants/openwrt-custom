@@ -7,7 +7,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^env.sh$"],
+      "fileMatch": ["(^|/)env\.sh"],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\n.+\"(?<currentValue>.*?)\""
       ],
