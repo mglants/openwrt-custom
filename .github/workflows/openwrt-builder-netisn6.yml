@@ -10,17 +10,19 @@
 # See /LICENSE for more information.
 #
 
-name: OpenWrt Builder ax6000 stable
+name: OpenWrt Builder netisn6
 
 on:
   repository_dispatch:
   workflow_dispatch:
+
 env:
   REPO_URL: https://github.com/openwrt/openwrt
+  REPO_BRANCH: master
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: ax6000/.config
-  DIY_P1_SH: ax6000/diy-part1.sh
-  DIY_P2_SH: ax6000/diy-part2.sh
+  CONFIG_FILE: netisn6/.config
+  DIY_P1_SH: netisn6/diy-part1.sh
+  DIY_P2_SH: netisn6/diy-part2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
@@ -52,8 +54,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        source $GITHUB_WORKSPACE/ax6000/env.sh
-        git clone $REPO_URL -b $OPENWRT_VERSION openwrt
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Generate release tag
@@ -61,7 +62,7 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         release_version="$(date +"%Y.%m.%d-%H%M")"
-        release_device="ax6000"
+        release_device="netisn6"
         echo="release_version=$release_version" >> $GITHUB_OUTPUT
         echo="release_device=$release_device" >> $GITHUB_OUTPUT
         echo "release_tag=$release_device-$release_version" >> $GITHUB_OUTPUT
@@ -162,6 +163,6 @@ jobs:
       with:
         keep_latest: 3
         delete_tags: true
-        delete_tag_pattern: ax6000.*
+        delete_tag_pattern: netisn6.*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

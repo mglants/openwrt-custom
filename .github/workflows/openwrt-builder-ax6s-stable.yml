@@ -15,8 +15,6 @@ name: OpenWrt Builder ax6s stable
 on:
   repository_dispatch:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 env:
   REPO_URL: https://github.com/openwrt/openwrt
   FEEDS_CONF: feeds.conf.default
