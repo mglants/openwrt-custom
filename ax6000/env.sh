@@ -16,4 +16,4 @@
 set -euo pipefail
 
 # renovate: datasource=git-tags depName=https://github.com/openwrt/openwrt.git
-OPENWRT_VERSION="v24.10.0-rc7"
+OPENWRT_VERSION="v24.10.0"
