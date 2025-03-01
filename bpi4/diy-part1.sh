@@ -20,4 +20,4 @@ releasemihomo=$(curl -s -L https://github.com/MetaCubeX/mihomo/releases/latest |
 curl -L https://github.com/MetaCubeX/mihomo/releases/download/$releasemihomo/mihomo-linux-arm64-$releasemihomo.gz -o /tmp/clash.gz
 mkdir -p files/opt/clash/bin && \
 gunzip -c /tmp/clash.gz > files/opt/clash/bin/clash && \
-chmod +x files/opt/clash/bin/clas
+chmod +x files/opt/clash/bin/clash
