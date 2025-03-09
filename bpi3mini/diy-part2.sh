@@ -18,5 +18,7 @@ git clone https://github.com/gSpotx2f/ruantiblock_openwrt.git --depth=1
 git clone https://github.com/mglants/awg-openwrt.git --depth=1
 git clone https://github.com/zerolabnet/SSClash.git --depth=1
 git clone https://github.com/4IceG/luci-app-sms-tool-js.git --depth=1
+git clone https://github.com/4IceG/luci-app-3ginfo-lite.git --depth=1
+git clone https://github.com/4IceG/luci-app-modemband.git --depth=1
 #git clone https://github.com/itdoginfo/podkop.git --depth=1
 cd -
