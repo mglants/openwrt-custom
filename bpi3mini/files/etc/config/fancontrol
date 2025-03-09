@@ -1,0 +1,9 @@
+config fancontrol
+    option modem_temp_method 'AT'
+    option temp_min '40'
+    option temp_max '70'
+    option sleep_interval '15'
+    option pwm_path '/sys/class/hwmon/hwmon1/pwm1'
+    option pwm_enable_path '/sys/class/hwmon/hwmon1/pwm1_enable'
+    option thermal_zone_cpu '/sys/class/thermal/thermal_zone0/temp'
+    option modem_at_port '/dev/ttyUSB3'
