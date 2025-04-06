@@ -10,7 +10,7 @@
 # See /LICENSE for more information.
 #
 
-name: OpenWrt Builder ax6s stable
+name: OpenWrt Builder ax3000t stable
 
 on:
   repository_dispatch:
@@ -18,9 +18,9 @@ on:
 env:
   REPO_URL: https://github.com/openwrt/openwrt
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: ax6s/.config
-  DIY_P1_SH: ax6s/diy-part1.sh
-  DIY_P2_SH: ax6s/diy-part2.sh
+  CONFIG_FILE: ax3000t/.config
+  DIY_P1_SH: ax3000t/diy-part1.sh
+  DIY_P2_SH: ax3000t/diy-part2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
@@ -52,7 +52,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        source $GITHUB_WORKSPACE/ax6s/env.sh
+        source $GITHUB_WORKSPACE/ax3000t/env.sh
         git clone $REPO_URL -b $OPENWRT_VERSION openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
@@ -61,7 +61,7 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         release_version="$(date +"%Y.%m.%d-%H%M")"
-        release_device="ax6s"
+        release_device="ax3000t"
         echo="release_version=$release_version" >> $GITHUB_OUTPUT
         echo="release_device=$release_device" >> $GITHUB_OUTPUT
         echo "release_tag=$release_device-$release_version" >> $GITHUB_OUTPUT
@@ -159,6 +159,6 @@ jobs:
       with:
         keep_latest: 3
         delete_tags: true
-        delete_tag_pattern: ax6s.*
+        delete_tag_pattern: ax3000t.*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
