@@ -1,4 +1,4 @@
-name: OpenWrt Firmware (ImageBuilder )
+name: OpenWrt Firmware (ImageBuilder)
 
 on:
   workflow_dispatch:
@@ -29,16 +29,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install build helpers
+      - name: Install helpers
         run: |
           set -euo pipefail
           sudo apt-get -qq update
-          # usign: fingerprint the pubkey
-          # opkg-utils: opkg-make-index for local feed
           sudo apt-get -qq install -y --no-install-recommends \
-            curl ca-certificates wget tar xz-utils usign opkg-utils
+            curl ca-certificates wget tar xz-utils gzip gettext-base
 
-      - name: Load device environment
+      - name: Load device env + set download base
         run: |
           set -euo pipefail
           source devices/${{ matrix.device }}/env.sh
@@ -46,8 +44,8 @@ jobs:
           echo "TARGET=$TARGET" >> $GITHUB_ENV
           echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
           echo "PROFILE=$PROFILE" >> $GITHUB_ENV
+          echo "OPKG_ARCH=$OPKG_ARCH" >> $GITHUB_ENV
 
-          # normalize version
           if [ "${OPENWRT_CHANNEL:-release}" = "snapshot" ]; then
             echo "OPENWRT_VERSION=SNAPSHOT" >> $GITHUB_ENV
             echo "DL_BASE=https://downloads.openwrt.org/snapshots" >> $GITHUB_ENV
@@ -57,7 +55,7 @@ jobs:
             echo "DL_BASE=https://downloads.openwrt.org/releases/$V" >> $GITHUB_ENV
           fi
 
-      - name: Read package list
+      - name: Read packages.txt
         run: |
           set -euo pipefail
           PACKAGES="$(grep -hvE '^\s*$|^\s*#' devices/${{ matrix.device }}/packages.txt \
@@ -72,45 +70,51 @@ jobs:
           wget -q "$IB_URL" -O imagebuilder.tar.xz
           tar -xf imagebuilder.tar.xz
           mv openwrt-imagebuilder-* imagebuilder
-      - name: Prepare FILES overlay (feeds + keys + device files)
+
+      - name: Prepare FILES overlay (feeds.tpl + keys.conf + device files)
         run: |
           set -euo pipefail
-          source devices/${{ matrix.device }}/env.sh
-
-          # Normalize OPENWRT_VERSION (strip leading v, handle snapshot)
-          if [ "${OPENWRT_CHANNEL:-release}" = "snapshot" ]; then
-            export OPENWRT_VERSION="SNAPSHOT"
-          else
-            export OPENWRT_VERSION="${OPENWRT_VERSION#v}"
-          fi
-
-          export OPKG_ARCH="${OPKG_ARCH}"
-
           mkdir -p files/etc/opkg
 
-          # Expand per-device feed template
+          # Expand feeds template from device dir
           FEEDS_TPL="devices/${{ matrix.device }}/feeds.conf.tpl"
           if [ ! -f "$FEEDS_TPL" ]; then
             echo "Missing $FEEDS_TPL" >&2
             exit 1
           fi
 
-          # envsubst is provided by gettext-base
-          sudo apt-get -qq update
-          sudo apt-get -qq install -y --no-install-recommends gettext-base
-
+          # Expand only these vars
+          export OPENWRT_VERSION="${{ env.OPENWRT_VERSION }}"
+          export OPKG_ARCH="${{ env.OPKG_ARCH }}"
           envsubst '${OPENWRT_VERSION} ${OPKG_ARCH}' < "$FEEDS_TPL" > files/etc/opkg/customfeeds.conf
 
-          # (optional) show result for debugging
           echo "=== customfeeds.conf ==="
           cat files/etc/opkg/customfeeds.conf
 
-      - name: Download custom IPKs (URL list) and create local feed
+          # Download keys listed in keys.conf (KEYID URL)
+          KEYCONF="devices/${{ matrix.device }}/keys.conf"
+          if [ -f "$KEYCONF" ]; then
+            mkdir -p files/etc/opkg/keys
+            while read -r keyid url; do
+              [ -z "${keyid:-}" ] && continue
+              case "$keyid" in \#*) continue ;; esac
+              echo "Key $keyid <- $url"
+              curl -fsSL "$url" -o "files/etc/opkg/keys/$keyid"
+              test -s "files/etc/opkg/keys/$keyid"
+            done < "$KEYCONF"
+          else
+            echo "No keys.conf for ${{ matrix.device }} (skipping key download)"
+          fi
+
+          # Copy device overlay files (optional)
+          if [ -d "devices/${{ matrix.device }}/files" ]; then
+            cp -a "devices/${{ matrix.device }}/files/." "files/"
+          fi
+
+      - name: Download custom IPKs (optional) and add localrepo feed
         run: |
           set -euo pipefail
           IPK_LIST="devices/${{ matrix.device }}/ipk-urls.txt"
-
-          # local feed directory inside the ImageBuilder tree
           mkdir -p imagebuilder/localrepo
 
           if [ -f "$IPK_LIST" ]; then
@@ -122,28 +126,26 @@ jobs:
                 -o "imagebuilder/localrepo/$(basename "$url")" "$url"
             done < "$IPK_LIST"
 
-            # Build Packages + Packages.gz for the local repo
-            (cd imagebuilder/localrepo && opkg-make-index . > Packages)
+            # Minimal index so opkg sees files in this repo
+            : > imagebuilder/localrepo/Packages
+            for ipk in imagebuilder/localrepo/*.ipk; do
+              [ -e "$ipk" ] || break
+              echo "Filename: $(basename "$ipk")" >> imagebuilder/localrepo/Packages
+              echo "" >> imagebuilder/localrepo/Packages
+            done
             gzip -9c imagebuilder/localrepo/Packages > imagebuilder/localrepo/Packages.gz
+
+            # Put localrepo FIRST in repositories.conf (build-time)
+            cd imagebuilder
+            echo "src/gz local file://$PWD/localrepo" > repositories.local.conf
+            cat repositories.conf >> repositories.local.conf
+            mv repositories.local.conf repositories.conf
+            cd ..
           else
             echo "No ipk-urls.txt for ${{ matrix.device }} (skipping custom IPKs)"
           fi
 
-      - name: Configure ImageBuilder repositories (add localrepo first)
-        run: |
-          set -euo pipefail
-          cd imagebuilder
-
-          # Prepend local file:// repo so packages from IPK URLs are available by name
-          # Note: file:// path is inside the ImageBuilder container/runtime (we run locally here)
-          # This works because we're running make image in this same workspace.
-          if [ -d "./localrepo" ] && [ -f "./localrepo/Packages.gz" ]; then
-            echo "src/gz local file://$PWD/localrepo" > repositories.local.conf
-            cat repositories.conf >> repositories.local.conf
-            mv repositories.local.conf repositories.conf
-          fi
-
-      - name: Build firmware (ImageBuilder make image)
+      - name: Build firmware
         run: |
           set -euo pipefail
           cd imagebuilder
