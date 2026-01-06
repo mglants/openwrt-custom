@@ -73,7 +73,7 @@ jobs:
           IB_URL="${DL_BASE}/targets/${TARGET}/${SUBTARGET}/openwrt-imagebuilder-${OPENWRT_VERSION}-${TARGET}-${SUBTARGET}.Linux-x86_64.tar.zst"
           echo "IB_URL=$IB_URL"
 
-          wget -q "$IB_URL" -O imagebuilder.tar.zst
+          wget "$IB_URL" -O imagebuilder.tar.zst
 
           # Extract .tar.zst
           tar --zstd -xf imagebuilder.tar.zst
