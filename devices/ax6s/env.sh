@@ -19,7 +19,7 @@ OPENWRT_CHANNEL="release"
 OPENWRT_VERSION="v24.10.5"
 
 TARGET="mediatek"
-SUBTARGET="filogic"
+SUBTARGET="mt7622"
 
 # Must match an ImageBuilder PROFILE exactly
 PROFILE="xiaomi_redmi-router-ax6s"
