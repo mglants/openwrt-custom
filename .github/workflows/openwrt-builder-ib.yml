@@ -1,160 +1,163 @@
-#
-# https://github.com/P3TERX/Actions-OpenWrt
-#
-# File: .github/workflows/openwrt-builder-ib.yml
-# Description: Build OpenWrt using Image Builder with custom feeds
-#
-# Copyright (c) 2019-2024 P3TERX <https://p3terx.com>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
-
-name: OpenWrt Builder IB
+name: OpenWrt Firmware (ImageBuilder )
 
 on:
-  repository_dispatch:
   workflow_dispatch:
   # push:
-  #   branches:
-  #     - main
   #   paths:
-  #     - '.github/workflows/openwrt-builder-ib.yml'
-  #     - '*/.config'
-  #     - '*/diy-part*.sh'
-  #     - '*/env.sh'
+  #     - "devices/**"
+  #     - ".github/workflows/firmware-imagebuilder.yml"
 
 env:
-  UPLOAD_BIN_DIR: false
-  UPLOAD_FIRMWARE: true
-  UPLOAD_RELEASE: true
   TZ: Europe/Moscow
 
 jobs:
   build:
-    runs-on: arc-runner-set-openwrt-custom
+    runs-on: ubuntu-latest
     strategy:
-      matrix:
-        device: [ax6s, ax3000t, ax6000, bpi3mini, bpi4, netisn6, rb5009]
       fail-fast: false
+      matrix:
+        device:
+          - ax6s
+          # - ax3000t
+          # - ax6000
+          # - bpi3mini
+          # - bpi4
+          # - netisn6
+          # - rb5009
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@main
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Initialization environment
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-        sudo docker image prune --all --force
-        sudo -E apt-get -qq update
-        sudo -E apt-get -qq install wget tar xz-utils
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
-        sudo timedatectl set-timezone "$TZ"
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
+      - name: Install build helpers
+        run: |
+          set -euo pipefail
+          sudo apt-get -qq update
+          # usign: fingerprint the pubkey
+          # opkg-utils: opkg-make-index for local feed
+          sudo apt-get -qq install -y --no-install-recommends \
+            curl ca-certificates wget tar xz-utils usign opkg-utils
 
-    - name: Prepare files
-      run: |
-        chmod +x ${{ matrix.device }}/diy-part1.sh
-        $GITHUB_WORKSPACE/${{ matrix.device }}/diy-part1.sh
+      - name: Load device environment
+        run: |
+          set -euo pipefail
+          source devices/${{ matrix.device }}/env.sh
 
-    - name: Generate release tag
-      id: tag
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      run: |
-        release_version="$(date +"%Y.%m.%d-%H%M")"
-        release_device="${{ matrix.device }}"
-        echo="release_version=$release_version" >> $GITHUB_OUTPUT
-        echo="release_device=$release_device" >> $GITHUB_OUTPUT
-        echo "release_tag=$release_device-$release_version" >> $GITHUB_OUTPUT
-        touch release.txt
-        echo "status=success" >> $GITHUB_OUTPUT
+          echo "TARGET=$TARGET" >> $GITHUB_ENV
+          echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
+          echo "PROFILE=$PROFILE" >> $GITHUB_ENV
 
-    - name: Download Image Builder
-      working-directory: /workdir
-      run: |
-        source $GITHUB_WORKSPACE/${{ matrix.device }}/env.sh
-        IB_URL="https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/${TARGET}/${SUBTARGET}/openwrt-imagebuilder-${TARGET}-${SUBTARGET}.Linux-x86_64.tar.xz"
-        wget -q $IB_URL -O imagebuilder.tar.xz
-        tar -xf imagebuilder.tar.xz
-        mv openwrt-imagebuilder-* imagebuilder
-        ln -sf /workdir/imagebuilder $GITHUB_WORKSPACE/imagebuilder
+          # normalize version
+          if [ "${OPENWRT_CHANNEL:-release}" = "snapshot" ]; then
+            echo "OPENWRT_VERSION=SNAPSHOT" >> $GITHUB_ENV
+            echo "DL_BASE=https://downloads.openwrt.org/snapshots" >> $GITHUB_ENV
+          else
+            V="${OPENWRT_VERSION#v}"
+            echo "OPENWRT_VERSION=$V" >> $GITHUB_ENV
+            echo "DL_BASE=https://downloads.openwrt.org/releases/$V" >> $GITHUB_ENV
+          fi
 
-    - name: Setup feeds and files
-      run: |
-        cd imagebuilder
-        cat > feeds.conf << EOF
-        src-git packages https://git.openwrt.org/feed/packages.git
-        src-git luci https://git.openwrt.org/project/luci.git
-        src-git routing https://git.openwrt.org/feed/routing.git
-        src-git telephony https://git.openwrt.org/feed/telephony.git
-        src-git video https://git.openwrt.org/feed/video.git
-        src-git ruantiblock https://github.com/gSpotx2f/ruantiblock_openwrt.git
-        src-git v2raya https://github.com/v2rayA/v2raya-openwrt.git
-        src-git awg https://github.com/mglants/awg-openwrt.git
-        src-git ssclash https://github.com/zerolabnet/SSClash.git
-        EOF
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        [ -e $GITHUB_WORKSPACE/files ] && cp -r $GITHUB_WORKSPACE/files .
-        [ -e $GITHUB_WORKSPACE/${{ matrix.device }}/files ] && cp -r $GITHUB_WORKSPACE/${{ matrix.device }}/files/* files/ || true
+      - name: Read package list
+        run: |
+          set -euo pipefail
+          PACKAGES="$(grep -hvE '^\s*$|^\s*#' devices/${{ matrix.device }}/packages.txt \
+            | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g')"
+          echo "PACKAGES=$PACKAGES" >> $GITHUB_ENV
 
-    - name: Build image
-      id: compile
-      run: |
-        cd imagebuilder
-        source $GITHUB_WORKSPACE/${{ matrix.device }}/env.sh
-        PACKAGES="luci-app-ruantiblock luci-app-v2raya luci-app-awg luci-app-ssclash"
-        make image PROFILE="$PROFILE" PACKAGES="$PACKAGES" FILES="files"
-        echo "status=success" >> $GITHUB_OUTPUT
-        echo "DEVICE_NAME=_${PROFILE}" >> $GITHUB_ENV
-        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+      - name: Download ImageBuilder
+        run: |
+          set -euo pipefail
+          IB_URL="${DL_BASE}/targets/${TARGET}/${SUBTARGET}/openwrt-imagebuilder-${TARGET}-${SUBTARGET}.Linux-x86_64.tar.xz"
+          echo "IB_URL=$IB_URL"
+          wget -q "$IB_URL" -O imagebuilder.tar.xz
+          tar -xf imagebuilder.tar.xz
+          mv openwrt-imagebuilder-* imagebuilder
+      - name: Prepare FILES overlay (feeds + keys + device files)
+        run: |
+          set -euo pipefail
+          source devices/${{ matrix.device }}/env.sh
 
-    - name: Check space usage
-      if: (!cancelled())
-      run: df -hT
+          # Normalize OPENWRT_VERSION (strip leading v, handle snapshot)
+          if [ "${OPENWRT_CHANNEL:-release}" = "snapshot" ]; then
+            export OPENWRT_VERSION="SNAPSHOT"
+          else
+            export OPENWRT_VERSION="${OPENWRT_VERSION#v}"
+          fi
 
-    - name: Organize files
-      id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-      run: |
-        cd imagebuilder/bin/targets/*/*
-        rm -rf packages
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "status=success" >> $GITHUB_OUTPUT
+          export OPKG_ARCH="${OPKG_ARCH}"
 
-    - name: Upload firmware directory
-      uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      with:
-        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE }}
+          mkdir -p files/etc/opkg
 
-    - name: Upload firmware to release
-      uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
-      if: steps.tag.outputs.status == 'success' && !cancelled()
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.tag.outputs.release_tag }}
-        body_path: release.txt
-        files: ${{ env.FIRMWARE }}/*
+          # Expand per-device feed template
+          FEEDS_TPL="devices/${{ matrix.device }}/feeds.conf.tpl"
+          if [ ! -f "$FEEDS_TPL" ]; then
+            echo "Missing $FEEDS_TPL" >&2
+            exit 1
+          fi
 
-    - name: Delete workflow runs
-      uses: Mattraks/delete-workflow-runs@main
-      with:
-        retain_days: 0
-        keep_minimum_runs: 2
+          # envsubst is provided by gettext-base
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y --no-install-recommends gettext-base
 
-    - name: Remove old Releases
-      uses: dev-drprasad/delete-older-releases@master
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
-      with:
-        keep_latest: 3
-        delete_tags: true
-        delete_tag_pattern: ${{ matrix.device }}.*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          envsubst '${OPENWRT_VERSION} ${OPKG_ARCH}' < "$FEEDS_TPL" > files/etc/opkg/customfeeds.conf
+
+          # (optional) show result for debugging
+          echo "=== customfeeds.conf ==="
+          cat files/etc/opkg/customfeeds.conf
+
+      - name: Download custom IPKs (URL list) and create local feed
+        run: |
+          set -euo pipefail
+          IPK_LIST="devices/${{ matrix.device }}/ipk-urls.txt"
+
+          # local feed directory inside the ImageBuilder tree
+          mkdir -p imagebuilder/localrepo
+
+          if [ -f "$IPK_LIST" ]; then
+            while read -r url; do
+              [ -z "${url:-}" ] && continue
+              case "$url" in \#*) continue ;; esac
+              echo "Downloading IPK: $url"
+              curl -fL --retry 3 --retry-delay 2 \
+                -o "imagebuilder/localrepo/$(basename "$url")" "$url"
+            done < "$IPK_LIST"
+
+            # Build Packages + Packages.gz for the local repo
+            (cd imagebuilder/localrepo && opkg-make-index . > Packages)
+            gzip -9c imagebuilder/localrepo/Packages > imagebuilder/localrepo/Packages.gz
+          else
+            echo "No ipk-urls.txt for ${{ matrix.device }} (skipping custom IPKs)"
+          fi
+
+      - name: Configure ImageBuilder repositories (add localrepo first)
+        run: |
+          set -euo pipefail
+          cd imagebuilder
+
+          # Prepend local file:// repo so packages from IPK URLs are available by name
+          # Note: file:// path is inside the ImageBuilder container/runtime (we run locally here)
+          # This works because we're running make image in this same workspace.
+          if [ -d "./localrepo" ] && [ -f "./localrepo/Packages.gz" ]; then
+            echo "src/gz local file://$PWD/localrepo" > repositories.local.conf
+            cat repositories.conf >> repositories.local.conf
+            mv repositories.local.conf repositories.conf
+          fi
+
+      - name: Build firmware (ImageBuilder make image)
+        run: |
+          set -euo pipefail
+          cd imagebuilder
+          make image PROFILE="${PROFILE}" PACKAGES="${PACKAGES}" FILES="${GITHUB_WORKSPACE}/files"
+
+      - name: Collect firmware
+        run: |
+          set -euo pipefail
+          mkdir -p output/${{ matrix.device }}
+          cp -a imagebuilder/bin/targets/*/* output/${{ matrix.device }}/
+          rm -rf output/${{ matrix.device }}/packages || true
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openwrt-${{ matrix.device }}-${{ env.OPENWRT_VERSION }}
+          path: output/${{ matrix.device }}
