@@ -65,11 +65,22 @@ jobs:
       - name: Download ImageBuilder
         run: |
           set -euo pipefail
-          IB_URL="${DL_BASE}/targets/${TARGET}/${SUBTARGET}/openwrt-imagebuilder-${TARGET}-${SUBTARGET}.Linux-x86_64.tar.xz"
+
+          # zstd is required for .tar.zst
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y --no-install-recommends wget tar zstd ca-certificates
+
+          IB_URL="${DL_BASE}/targets/${TARGET}/${SUBTARGET}/openwrt-imagebuilder-${OPENWRT_VERSION}-${TARGET}-${SUBTARGET}.Linux-x86_64.tar.zst"
           echo "IB_URL=$IB_URL"
-          wget -q "$IB_URL" -O imagebuilder.tar.xz
-          tar -xf imagebuilder.tar.xz
+
+          wget -q "$IB_URL" -O imagebuilder.tar.zst
+
+          # Extract .tar.zst
+          tar --zstd -xf imagebuilder.tar.zst
+
+          # Normalize directory name
           mv openwrt-imagebuilder-* imagebuilder
+
 
       - name: Prepare FILES overlay (feeds.tpl + keys.conf + device files)
         run: |
