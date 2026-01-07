@@ -100,7 +100,7 @@ jobs:
 
           echo "=== customfeeds.conf ==="
           cat imagebuilder/customfeeds.conf
-          sed -i '1r imagebuilder/customfeeds.conf' imagebuilder/feeds.conf
+          sed -i '1r imagebuilder/customfeeds.conf' imagebuilder/repositories.conf
 
           # Download keys listed in keys.conf (KEYID URL)
           KEYCONF="devices/${{ matrix.device }}/keys.conf"
