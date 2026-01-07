@@ -178,7 +178,7 @@ jobs:
         with:
           tag_name: ${{ steps.tag.outputs.release_tag }}
           body_path: release.txt
-          files: output/${{ matrix.device }}/*
+          files: output/${{ matrix.device }}/*/*
 
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@main
