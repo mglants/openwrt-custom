@@ -192,6 +192,6 @@ jobs:
         with:
           keep_latest: 5
           delete_tags: true
-          delete_tag_pattern: ${{ matrix.device }}.*
+          delete_tag_pattern: ${{ matrix.device }}-${{ env.OPENWRT_VERSION }}.*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
