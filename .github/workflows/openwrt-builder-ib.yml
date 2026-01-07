@@ -86,8 +86,6 @@ jobs:
       - name: Prepare FILES overlay (feeds.tpl + keys.conf + device files)
         run: |
           set -euo pipefail
-          mkdir -p files/etc/opkg
-
           # Expand feeds template from device dir
           FEEDS_TPL="devices/${{ matrix.device }}/feeds.conf.tpl"
           if [ ! -f "$FEEDS_TPL" ]; then
@@ -98,21 +96,21 @@ jobs:
           # Expand only these vars
           export OPENWRT_VERSION="${{ env.OPENWRT_VERSION }}"
           export OPKG_ARCH="${{ env.OPKG_ARCH }}"
-          envsubst '${OPENWRT_VERSION} ${OPKG_ARCH}' < "$FEEDS_TPL" > files/etc/opkg/customfeeds.conf
+          envsubst '${OPENWRT_VERSION} ${OPKG_ARCH}' < "$FEEDS_TPL" > imagebuilder/customfeeds.conf
 
           echo "=== customfeeds.conf ==="
-          cat files/etc/opkg/customfeeds.conf
+          cat imagebuilder/customfeeds.conf
+          sed -i '1r imagebuilder/customfeeds.conf' imagebuilder/feeds.conf
 
           # Download keys listed in keys.conf (KEYID URL)
           KEYCONF="devices/${{ matrix.device }}/keys.conf"
           if [ -f "$KEYCONF" ]; then
-            mkdir -p files/etc/opkg/keys
             while read -r keyid url; do
               [ -z "${keyid:-}" ] && continue
               case "$keyid" in \#*) continue ;; esac
               echo "Key $keyid <- $url"
-              curl -fsSL "$url" -o "files/etc/opkg/keys/$keyid"
-              test -s "files/etc/opkg/keys/$keyid"
+              curl -fsSL "$url" -o "imagebuilder/keys/$keyid"
+              test -s "imagebuilder/keys/$keyid"
             done < "$KEYCONF"
           else
             echo "No keys.conf for ${{ matrix.device }} (skipping key download)"
@@ -120,39 +118,22 @@ jobs:
 
           # Copy device overlay files (optional)
           if [ -d "devices/${{ matrix.device }}/files" ]; then
-            cp -a "devices/${{ matrix.device }}/files/." "files/"
+            cp -a "devices/${{ matrix.device }}/files/." "imagebuilder/files/"
           fi
 
-      - name: Download custom IPKs (optional) and add localrepo feed
+      - name: Download custom IPKs (optional)
         run: |
           set -euo pipefail
           IPK_LIST="devices/${{ matrix.device }}/ipk-urls.txt"
-          mkdir -p imagebuilder/localrepo
-
           if [ -f "$IPK_LIST" ]; then
             while read -r url; do
               [ -z "${url:-}" ] && continue
               case "$url" in \#*) continue ;; esac
               echo "Downloading IPK: $url"
               curl -fL --retry 3 --retry-delay 2 \
-                -o "imagebuilder/localrepo/$(basename "$url")" "$url"
+                -o "imagebuilder/packages/$(basename "$url")" "$url"
             done < "$IPK_LIST"
 
-            # Minimal index so opkg sees files in this repo
-            : > imagebuilder/localrepo/Packages
-            for ipk in imagebuilder/localrepo/*.ipk; do
-              [ -e "$ipk" ] || break
-              echo "Filename: $(basename "$ipk")" >> imagebuilder/localrepo/Packages
-              echo "" >> imagebuilder/localrepo/Packages
-            done
-            gzip -9c imagebuilder/localrepo/Packages > imagebuilder/localrepo/Packages.gz
-
-            # Put localrepo FIRST in repositories.conf (build-time)
-            cd imagebuilder
-            echo "src/gz local file://$PWD/localrepo" > repositories.local.conf
-            cat repositories.conf >> repositories.local.conf
-            mv repositories.local.conf repositories.conf
-            cd ..
           else
             echo "No ipk-urls.txt for ${{ matrix.device }} (skipping custom IPKs)"
           fi
@@ -161,7 +142,7 @@ jobs:
         run: |
           set -euo pipefail
           cd imagebuilder
-          make image PROFILE="${PROFILE}" PACKAGES="${PACKAGES}" FILES="${GITHUB_WORKSPACE}/files"
+          make image PROFILE="${PROFILE}" PACKAGES="${PACKAGES}" FILES="files"
 
       - name: Collect firmware
         run: |
