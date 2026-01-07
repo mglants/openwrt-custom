@@ -58,6 +58,16 @@ jobs:
             echo "DL_BASE=https://downloads.openwrt.org/releases/$V" >> $GITHUB_ENV
           fi
 
+      - name: Generate release tag
+        id: tag
+        if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+        run: |
+          release_date="$(date +"%Y.%m.%d-%H%M")"
+          echo "release_tag=${{ matrix.device }}-${{ env.OPENWRT_VERSION }}-$release_date" >> $GITHUB_OUTPUT
+          touch release.txt
+          [ ${UPLOAD_GOFILE} = true && ${{ steps.gofile.outputs.url }} ] && echo "🔗 [GoFile](${{ steps.gofile.outputs.url }})" >> release.txt
+          echo "status=success" >> $GITHUB_OUTPUT
+
       - name: Read packages.txt
         run: |
           set -euo pipefail
@@ -158,5 +168,31 @@ jobs:
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
-          name: openwrt-${{ matrix.device }}-${{ env.OPENWRT_VERSION }}
+          name: ${{ steps.tag.outputs.release_tag }}
           path: output/${{ matrix.device }}
+
+      - name: Upload firmware to release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        if: steps.tag.outputs.status == 'success' && !cancelled()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          body_path: release.txt
+          files: output/${{ matrix.device }}
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@main
+        with:
+          retain_days: 0
+          keep_minimum_runs: 5
+
+      - name: Remove old Releases
+        uses: dev-drprasad/delete-older-releases@master
+        if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+        with:
+          keep_latest: 5
+          delete_tags: true
+          delete_tag_pattern: ${{ matrix.device }}.*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
