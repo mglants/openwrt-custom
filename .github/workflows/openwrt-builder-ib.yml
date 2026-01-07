@@ -96,15 +96,11 @@ jobs:
           # Expand only these vars
           export OPENWRT_VERSION="${{ env.OPENWRT_VERSION }}"
           export OPKG_ARCH="${{ env.OPKG_ARCH }}"
-          echo $OPENWRT_VERSION
-          echo $OPKG_ARCH
-          echo $FEEDS_TPL
-          cat $FEEDS_TPL
-
           envsubst '${OPENWRT_VERSION} ${OPKG_ARCH}' < "$FEEDS_TPL" > imagebuilder/customfeeds.conf
 
           echo "=== customfeeds.conf ==="
           cat imagebuilder/customfeeds.conf
+          ls imagebuilder/
           sed -i '1r imagebuilder/customfeeds.conf' imagebuilder/repositories.conf
 
           # Download keys listed in keys.conf (KEYID URL)
