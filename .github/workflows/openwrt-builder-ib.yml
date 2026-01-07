@@ -81,7 +81,8 @@ jobs:
 
           # Normalize directory name
           mv openwrt-imagebuilder-* imagebuilder
-
+          ls ./
+          ls imagebuilder/
 
       - name: Prepare FILES overlay (feeds.tpl + keys.conf + device files)
         run: |
@@ -100,7 +101,6 @@ jobs:
 
           echo "=== customfeeds.conf ==="
           cat imagebuilder/customfeeds.conf
-          ls imagebuilder/
           sed -i '1r imagebuilder/customfeeds.conf' imagebuilder/repositories.conf
 
           # Download keys listed in keys.conf (KEYID URL)
