@@ -17,7 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         device:
-          - ax6s
+          # - ax6s
+          - wr3000h
           # - ax3000t
           # - ax6000
           # - bpi3mini
