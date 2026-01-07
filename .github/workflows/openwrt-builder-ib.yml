@@ -97,6 +97,7 @@ jobs:
           fi
 
           # Expand only these vars
+          export OPENWRT_VERSION="${{ env.OPENWRT_VERSION }}"
           export OPENWRT_VERSION_MAJOR="${{ env.OPENWRT_VERSION_MAJOR }}"
           export OPKG_ARCH="${{ env.OPKG_ARCH }}"
           envsubst '${OPENWRT_VERSION_MAJOR} ${OPKG_ARCH}' < "$FEEDS_TPL" > imagebuilder/customfeeds.conf
