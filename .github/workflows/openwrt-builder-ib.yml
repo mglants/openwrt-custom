@@ -23,11 +23,11 @@ jobs:
       devices: ${{ steps.discover.outputs.matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Find devices
         id: discover
-        uses: mirceanton/action-folder-matrix@510538fe18f90e23766215b5f856a516ec5739bc
+        uses: mirceanton/action-folder-matrix@510538fe18f90e23766215b5f856a516ec5739bc # v2.1.2
         with:
           path: ./devices
           changed-only: ${{ github.event_name != 'workflow_dispatch' }}
@@ -36,7 +36,7 @@ jobs:
 
   build:
     runs-on: arc-runner-set-openwrt-custom
-    if: fromJson(needs.discover-devices.outputs.devices).directory[0] != null
+    if: fromJson(needs.discover-devices.outputs.devices).include[0] != null
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.discover-devices.outputs.devices) }}
