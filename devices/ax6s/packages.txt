@@ -1,3 +1,4 @@
 nikki
 luci-app-nikki
 luci
+kmod-amneziawg
