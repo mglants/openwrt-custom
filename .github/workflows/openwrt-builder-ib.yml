@@ -2,10 +2,10 @@ name: OpenWrt Firmware (ImageBuilder)
 
 on:
   workflow_dispatch:
-  # push:
-  #   paths:
-  #     - "devices/**"
-  #     - ".github/workflows/firmware-imagebuilder.yml"
+  push:
+    paths:
+      - "devices/**"
+      - ".github/workflows/firmware-imagebuilder.yml"
 
 env:
   TZ: Europe/Moscow
