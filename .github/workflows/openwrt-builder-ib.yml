@@ -162,6 +162,7 @@ jobs:
         run: |
           set -euo pipefail
           IPK_LIST="devices/${{ matrix.device }}/ipk-urls.txt"
+          envsubst < devices/${{ matrix.device }}/ipk-urls.txt.tpl > $IPK_LIST
           if [ -f "$IPK_LIST" ]; then
             while read -r url; do
               [ -z "${url:-}" ] && continue

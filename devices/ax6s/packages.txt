@@ -1,4 +1,3 @@
 nikki
 luci-app-nikki
 luci
-dnsmasq-full
