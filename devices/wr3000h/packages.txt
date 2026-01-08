@@ -6,4 +6,3 @@ luci-proto-amneziawg
 amneziawg-tools
 luci-proto-wireguard
 wireguard-tools
-luci-theme-argon
