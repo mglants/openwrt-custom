@@ -1,0 +1,56 @@
+<!---
+NOTE: AUTO-GENERATED FILE
+to edit this file, instead edit its template at: ./ci/templates/README.md.j2
+-->
+<div align="center">
+
+
+## OpenWrt Firmwares
+
+_Collection of firmwares for routers to fight against censorship_
+
+</div>
+
+<div align="center">
+
+![GitHub Repo stars](https://img.shields.io/github/stars/{{ repo_name }}?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/{{ repo_name }}?style=for-the-badge)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/{{ repo_name }}/scheduled-release.yaml?style=for-the-badge&label=Scheduled%20Release)
+
+</div>
+
+---
+
+## About
+
+This repository contains a custom **OpenWrt firmware** focused on reliability, reproducibility, and autonomous operation in constrained network environments.
+The goal is to provide a ready-to-use system that requires minimal user configuration while remaining flexible and maintainable over time.
+
+- Nikki is main software for VLESS subscriptions
+- Some packages are added to make VPN tunnels
+- Minimal software packs for routers
+- For LTE/4G routers software are included
+- No custom build or kernel, just repacking
+- Suggestions are welcomed
+
+The firmware includes a curated set of networking and management packages:
+
+- `nikki`
+- `luci-app-nikki`
+- `luci`
+- `kmod-amneziawg`
+- `luci-proto-amneziawg`
+- `amneziawg-tools`
+- `luci-proto-wireguard`
+- `wireguard-tools`
+
+---
+
+
+### Firmwares
+
+Router | OpenWrt | Packages | Release
+--- | --- | --- | ---
+{% for router in routers | sort(attribute='name') -%}
+**{{ router.name }}** | {{ router.openwrt_version or "—" }} | [{{ router.packages_count }} packages]({{ router.packages_file_url }}) | {% if router.release_url %}[download]({{ router.release_url }}){% else %}—{% endif %}
+{% endfor %}

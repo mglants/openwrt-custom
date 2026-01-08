@@ -1,0 +1,58 @@
+---
+name: "Workflow call: Render Readme"
+
+on:
+  workflow_call:
+    secrets:
+      MGLANTS_APP_ID:
+        description: "The App ID of the GitHub App"
+        required: true
+      MGLANTS_APP_PRIVATE_KEY:
+        description: "The private key of the GitHub App"
+        required: true
+
+jobs:
+  render-readme:
+    name: Render README
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: "Generate Short Lived OAuth App Token (ghs_*)"
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+        id: app-token
+        with:
+          app-id: "${{ secrets.MGLANTS_APP_ID }}"
+          private-key: "${{ secrets.MGLANTS_APP_PRIVATE_KEY }}"
+
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+          cache: "pip" # caching pip dependencies
+
+      - name: Install Python Requirements
+        run: |
+          pip install -r ./.ci/scripts/requirements.txt && pip freeze
+
+      - name: Render README
+        env:
+          GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
+        run: |
+          python ./.ci/scripts/render-readme.py
+
+      - name: Commit Changes
+        uses: planetscale/ghcommit-action@25309d8005ac7c3bcd61d3fe19b69e0fe47dbdde # v0.2.20
+        with:
+          commit_message: "chore: regenerate README.md [skip ci]"
+          repo: ${{ github.repository }}
+          branch: main
+          empty: false
+          file_pattern: "README.md"
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}

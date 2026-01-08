@@ -37,6 +37,8 @@ jobs:
   build:
     runs-on: arc-runner-set-openwrt-custom
     needs: discover-devices
+    permissions:
+      contents: write
     if: fromJson(needs.discover-devices.outputs.devices).directory[0] != null
     strategy:
       fail-fast: false
@@ -189,14 +191,33 @@ jobs:
           path: output/${{ matrix.directory }}
 
       - name: Upload firmware to release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
-        if: steps.tag.outputs.status == 'success' && !cancelled() && steps.changes.outputs.device == 'true'
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
+        id: release
+        if: steps.tag.outputs.status == 'success' && !cancelled()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.tag.outputs.release_tag }}
           body_path: release.txt
           files: output/${{ matrix.directory }}/*/*
+
+      - name: Write last.url for router
+        if: steps.tag.outputs.status == 'success' && !cancelled()
+        run: |
+          set -euo pipefail
+          mkdir -p "firmwares/${{ matrix.directory }}"
+          echo "${{ steps.release.outputs.url }}" > "firmwares/${{ matrix.directory }}/last.url"
+
+      - name: Commit Changes
+        if: steps.tag.outputs.status == 'success' && !cancelled() && steps.changes.outputs.device == 'true'
+        uses: planetscale/ghcommit-action@25309d8005ac7c3bcd61d3fe19b69e0fe47dbdde # v0.2.20
+        with:
+          commit_message: "chore: update last.url"
+          repo: ${{ github.repository }}
+          branch: main
+          empty: false
+          file_pattern: |
+            firmwares/${{ matrix.directory }}/last.url
 
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@main
@@ -213,3 +234,13 @@ jobs:
           delete_tag_pattern: ${{ matrix.directory }}-${{ env.OPENWRT_VERSION }}.*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  render-readme:
+    name: Render Readme
+    permissions:
+      contents: write
+    needs:
+      - build
+    if: ${{ always() && needs.build.result != 'failure' }}}
+    uses: ./.github/workflows/workflow_call-render-readme.yaml
+    secrets: inherit
