@@ -2,3 +2,5 @@ nikki
 luci-app-nikki
 luci
 kmod-amneziawg
+luci-proto-amneziawg
+amneziawg-tools
