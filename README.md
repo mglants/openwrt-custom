@@ -5,7 +5,7 @@ to edit this file, instead edit its template at: ./ci/templates/README.md.j2
 <div align="center">
 
 
-## OpenWrt Firmwares
+## Glants OpenWrt Firmwares
 
 _Collection of firmwares for routers to fight against censorship_
 
@@ -13,9 +13,9 @@ _Collection of firmwares for routers to fight against censorship_
 
 <div align="center">
 
-![GitHub Repo stars](https://img.shields.io/github/stars/mglants/openwrt-custom?style=for-the-badge)
-![GitHub forks](https://img.shields.io/github/forks/mglants/openwrt-custom?style=for-the-badge)
-![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/mglants/openwrt-custom/scheduled-release.yaml?style=for-the-badge&label=Scheduled%20Release)
+![GitHub Repo stars](https://img.shields.io/github/stars/mglants/glantswrt?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/mglants/glantswrt?style=for-the-badge)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/mglants/glantswrt/scheduled-release.yaml?style=for-the-badge&label=Scheduled%20Release)
 
 </div>
 
@@ -49,9 +49,25 @@ The firmware includes a curated set of networking and management packages:
 
 ### Firmwares
 
-Router | OpenWrt | Packages | Release
---- | --- | --- | ---
-**ax3000t** | v24.10.5 | [8 packages](https://github.com/mglants/openwrt-custom/blob/main/devices/ax3000t/packages.txt) | —
-**ax6s** | v24.10.5 | [8 packages](https://github.com/mglants/openwrt-custom/blob/main/devices/ax6s/packages.txt) | —
-**netisn6** | v24.10.5 | [21 packages](https://github.com/mglants/openwrt-custom/blob/main/devices/netisn6/packages.txt) | —
-**wr3000h** | v24.10.5 | [8 packages](https://github.com/mglants/openwrt-custom/blob/main/devices/wr3000h/packages.txt) | —
+Vendor | Router | OpenWrt | Packages | Release
+--- | --- | --- | --- | ---
+cudy |
+**wr3000h** |
+v24.10.5 |
+[8](https://github.com/mglants/glantswrt/blob/main/devices/wr3000h/packages.txt) |
+—
+netis |
+**n6** |
+v24.10.5 |
+[21](https://github.com/mglants/glantswrt/blob/main/devices/netisn6/packages.txt) |
+—
+xiaomi |
+**ax3000t** |
+v24.10.5 |
+[8](https://github.com/mglants/glantswrt/blob/main/devices/ax3000t/packages.txt) |
+—
+xiaomi |
+**ax6s** |
+v24.10.5 |
+[8](https://github.com/mglants/glantswrt/blob/main/devices/ax6s/packages.txt) |
+—
