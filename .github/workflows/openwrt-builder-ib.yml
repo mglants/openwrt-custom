@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Discover devices
-        uses: mirceanton/action-folder-matrix@v1
+        uses: mirceanton/action-folder-matrix@510538fe18f90e23766215b5f856a516ec5739bc
         id: scan
         with:
           path: './devices'
