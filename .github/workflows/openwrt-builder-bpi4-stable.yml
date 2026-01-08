@@ -28,7 +28,7 @@ env:
 
 jobs:
   build:
-    runs-on: arc-runner-set-openwrt-custom
+    runs-on: arc-runner-set-glantswrt
 
     steps:
     - name: Checkout

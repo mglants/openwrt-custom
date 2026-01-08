@@ -34,7 +34,7 @@ env:
 
 jobs:
   build:
-    runs-on: arc-runner-set-openwrt-custom
+    runs-on: arc-runner-set-glantswrt
     strategy:
       matrix:
         device: [ax6s, ax3000t, ax6000, bpi3mini, bpi4, netisn6, rb5009]

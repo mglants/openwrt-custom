@@ -10,7 +10,7 @@
 # See /LICENSE for more information.
 #
 
-name: OpenWrt Builder bpi3mini stable
+name: OpenWrt Builder ax6000 stable
 
 on:
   repository_dispatch:
@@ -18,9 +18,9 @@ on:
 env:
   REPO_URL: https://github.com/openwrt/openwrt
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: bpi3mini/.config
-  DIY_P1_SH: bpi3mini/diy-part1.sh
-  DIY_P2_SH: bpi3mini/diy-part2.sh
+  CONFIG_FILE: ax6000/.config
+  DIY_P1_SH: ax6000/diy-part1.sh
+  DIY_P2_SH: ax6000/diy-part2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
@@ -52,7 +52,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        source $GITHUB_WORKSPACE/bpi3mini/env.sh
+        source $GITHUB_WORKSPACE/ax6000/env.sh
         git clone $REPO_URL -b $OPENWRT_VERSION openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
@@ -61,7 +61,7 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         release_version="$(date +"%Y.%m.%d-%H%M")"
-        release_device="bpi3mini"
+        release_device="ax6000"
         echo="release_version=$release_version" >> $GITHUB_OUTPUT
         echo="release_device=$release_device" >> $GITHUB_OUTPUT
         echo "release_tag=$release_device-$release_version" >> $GITHUB_OUTPUT
@@ -111,6 +111,9 @@ jobs:
       id: compile
       run: |
         cd openwrt
+        sed -i 's|CONFIG_VERSION_NUMBER=""|CONFIG_VERSION_NUMBER="${{ steps.tag.outputs.release_version }}"|g' .config
+        sed -i 's|CONFIG_VERSION_PRODUCT=""|CONFIG_VERSION_PRODUCT="${{ steps.tag.outputs.release_device }}"|g' .config
+        cat .config | grep CONFIG_VERSION_
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
@@ -167,6 +170,6 @@ jobs:
       with:
         keep_latest: 3
         delete_tags: true
-        delete_tag_pattern: bpi3mini.*
+        delete_tag_pattern: ax6000.*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
