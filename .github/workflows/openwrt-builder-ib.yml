@@ -20,9 +20,9 @@ jobs:
 
       - id: set-matrix
         run: |
-          devices=$(ls -d devices/*/ | xargs -n 1 basename)
-          json=$(printf '%s\n' "$devices" | jq -R . | jq -s .)
-          echo "matrix={\"device\":$json}" >> $GITHUB_OUTPUT
+          devices=$(ls -d devices/*/ 2>/dev/null | xargs -n 1 basename)
+          json=$(printf '%s\n' $devices | jq -R . | jq -cs .)
+          echo "matrix={\"device\":$json}" >> "$GITHUB_OUTPUT"
 
   build:
     runs-on: arc-runner-set-openwrt-custom
