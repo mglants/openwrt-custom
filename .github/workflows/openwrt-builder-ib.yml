@@ -44,14 +44,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Stop if device not changed
-        if: steps.changes.outputs.device != 'true'
-        run: |
-          echo "No changes for ${{ matrix.device }}, skipping build."
-          exit 0
-
       - name: Install helpers
-        if: steps.changes.outputs.device == 'true'
         run: |
           set -euo pipefail
           sudo apt-get -qq update
@@ -60,7 +53,6 @@ jobs:
           build-essential file libncurses-dev zlib1g-dev gawk git \
           gettext libssl-dev xsltproc rsync wget unzip python3 python3-distutils
       - name: Load device env + set download base
-        if: steps.changes.outputs.device == 'true'
         run: |
           set -euo pipefail
           source devices/${{ matrix.device }}/env.sh
@@ -82,7 +74,6 @@ jobs:
           fi
 
       - name: Generate release tag
-        if: steps.changes.outputs.device == 'true'
         id: tag
         run: |
           release_date="$(date +"%Y.%m.%d-%H%M")"
@@ -92,7 +83,6 @@ jobs:
           echo "status=success" >> $GITHUB_OUTPUT
 
       - name: Read packages.txt
-        if: steps.changes.outputs.device == 'true'
         run: |
           set -euo pipefail
           PACKAGES="$(grep -hvE '^\s*$|^\s*#' devices/${{ matrix.device }}/packages.txt \
@@ -100,7 +90,6 @@ jobs:
           echo "PACKAGES=$PACKAGES" >> $GITHUB_ENV
 
       - name: Download ImageBuilder
-        if: steps.changes.outputs.device == 'true'
         run: |
           set -euo pipefail
 
@@ -122,7 +111,6 @@ jobs:
           ls imagebuilder/
 
       - name: Prepare FILES overlay (feeds.tpl + keys.conf + device files)
-        if: steps.changes.outputs.device == 'true'
         run: |
           set -euo pipefail
           # Expand feeds template from device dir
@@ -163,7 +151,6 @@ jobs:
           fi
 
       - name: Download custom IPKs (optional)
-        if: steps.changes.outputs.device == 'true'
         run: |
           set -euo pipefail
           IPK_LIST="devices/${{ matrix.device }}/ipk-urls.txt"
@@ -182,14 +169,12 @@ jobs:
           fi
 
       - name: Build firmware
-        if: steps.changes.outputs.device == 'true'
         run: |
           set -euo pipefail
           cd imagebuilder
           make image PROFILE="${PROFILE}" PACKAGES="${PACKAGES}" FILES="files"
 
       - name: Collect firmware
-        if: steps.changes.outputs.device == 'true'
         run: |
           set -euo pipefail
           mkdir -p output/${{ matrix.device }}
@@ -197,7 +182,6 @@ jobs:
           rm -rf output/${{ matrix.device }}/packages || true
 
       - name: Upload firmware artifact
-        if: steps.changes.outputs.device == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ steps.tag.outputs.release_tag }}
@@ -214,14 +198,13 @@ jobs:
           files: output/${{ matrix.device }}/*/*
 
       - name: Delete workflow runs
-        if: steps.changes.outputs.device == 'true'
         uses: Mattraks/delete-workflow-runs@main
         with:
           retain_days: 0
           keep_minimum_runs: 5
 
       - name: Remove old Releases
-        if: steps.changes.outputs.device == 'true' && env.UPLOAD_RELEASE == 'true' && !cancelled()
+        if: env.UPLOAD_RELEASE == 'true' && !cancelled()
         uses: dev-drprasad/delete-older-releases@master
         with:
           keep_latest: 5
