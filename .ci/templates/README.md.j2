@@ -52,5 +52,5 @@ The firmware includes a curated set of networking and management packages:
 Vendor | Router | OpenWrt | Packages | Release
 --- | --- | --- | --- | ---
 {% for router in routers | sort(attribute='vendor') -%}
-{{ router.vendor or "—" }} | **{{ router.name }}** | {{ router.openwrt_version or "—" }} | [{{ router.packages_count }}]({{ router.packages_file_url }}) | {% if router.release_url %}[download]({{ router.release_url }}){% else %}—{% endif %}
+{{ router.vendor or "—" }} | **{{ router.name }}** | {{ router.openwrt_version or "—" }} | [{{ router.packages_count }}]({{ router.packages_file_url }}) | [download](https://github.com/{{ repo_name }}/releases?q={{ router.id }}-&expanded=true)
 {% endfor %}

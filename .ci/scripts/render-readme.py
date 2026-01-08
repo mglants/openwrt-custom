@@ -88,7 +88,6 @@ def build_routers() -> list[dict]:
 
         packages_path = router_dir / "packages.txt"
         env_sh_path = router_dir / "env.sh"
-        last_url_path = firmwares_dir / router_id / "last.url"
 
         env_vars = parse_env_file(env_sh_path)
 
@@ -97,7 +96,6 @@ def build_routers() -> list[dict]:
         openwrt_version = env_vars.get("OPENWRT_VERSION", "")
 
         packages = parse_packages(packages_path)
-        release_url = read_first_nonempty_line(last_url_path) if last_url_path.exists() else ""
 
         routers.append({
             "id": router_id,
@@ -106,12 +104,10 @@ def build_routers() -> list[dict]:
             "openwrt_version": openwrt_version,
             "packages": packages,
             "packages_count": len(packages),
-            "release_url": release_url,
 
             # helpful file links in repo
             "packages_file_url": github_blob_url(repo_name, default_branch, f"devices/{router_id}/packages.txt"),
-            "env_file_url": github_blob_url(repo_name, default_branch, f"devices/{router_id}/env.sh"),
-            "last_url_file_url": github_blob_url(repo_name, default_branch, f"firmwares/{router_id}/last.url"),
+            "env_file_url": github_blob_url(repo_name, default_branch, f"devices/{router_id}/env.sh")
         })
 
     return routers
