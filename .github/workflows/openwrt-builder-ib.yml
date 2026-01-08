@@ -56,7 +56,7 @@ jobs:
       - name: Load device env + set download base
         run: |
           set -euo pipefail
-          source devices/${{ matrix.device }}/env.sh
+          source devices/${{ matrix.directory }}/env.sh
 
           echo "TARGET=$TARGET" >> $GITHUB_ENV
           echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
@@ -78,7 +78,7 @@ jobs:
         id: tag
         run: |
           release_date="$(date +"%Y.%m.%d-%H%M")"
-          echo "release_tag=${{ matrix.device }}-${{ env.OPENWRT_VERSION }}-$release_date" >> $GITHUB_OUTPUT
+          echo "release_tag=${{ matrix.directory }}-${{ env.OPENWRT_VERSION }}-$release_date" >> $GITHUB_OUTPUT
           touch release.txt
           [ ${UPLOAD_GOFILE} = true && ${{ steps.gofile.outputs.url }} ] && echo "🔗 [GoFile](${{ steps.gofile.outputs.url }})" >> release.txt
           echo "status=success" >> $GITHUB_OUTPUT
@@ -86,7 +86,7 @@ jobs:
       - name: Read packages.txt
         run: |
           set -euo pipefail
-          PACKAGES="$(grep -hvE '^\s*$|^\s*#' devices/${{ matrix.device }}/packages.txt \
+          PACKAGES="$(grep -hvE '^\s*$|^\s*#' devices/${{ matrix.directory }}/packages.txt \
             | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g')"
           echo "PACKAGES=$PACKAGES" >> $GITHUB_ENV
 
@@ -115,7 +115,7 @@ jobs:
         run: |
           set -euo pipefail
           # Expand feeds template from device dir
-          FEEDS_TPL="devices/${{ matrix.device }}/feeds.conf.tpl"
+          FEEDS_TPL="devices/${{ matrix.directory }}/feeds.conf.tpl"
           if [ ! -f "$FEEDS_TPL" ]; then
             echo "Missing $FEEDS_TPL" >&2
             exit 1
@@ -133,7 +133,7 @@ jobs:
           sed -i '1r imagebuilder/customfeeds.conf' imagebuilder/repositories.conf
           sed -i '/option check_signature/d' imagebuilder/repositories.conf
           # Download keys listed in keys.conf (KEYID URL)
-          KEYCONF="devices/${{ matrix.device }}/keys.conf"
+          KEYCONF="devices/${{ matrix.directory }}/keys.conf"
           if [ -f "$KEYCONF" ]; then
             while read -r keyid url; do
               [ -z "${keyid:-}" ] && continue
@@ -143,19 +143,19 @@ jobs:
               test -s "imagebuilder/keys/$keyid"
             done < "$KEYCONF"
           else
-            echo "No keys.conf for ${{ matrix.device }} (skipping key download)"
+            echo "No keys.conf for ${{ matrix.directory }} (skipping key download)"
           fi
 
           # Copy device overlay files (optional)
-          if [ -d "devices/${{ matrix.device }}/files" ]; then
-            cp -a "devices/${{ matrix.device }}/files/." "imagebuilder/files/"
+          if [ -d "devices/${{ matrix.directory }}/files" ]; then
+            cp -a "devices/${{ matrix.directory }}/files/." "imagebuilder/files/"
           fi
 
       - name: Download custom IPKs (optional)
         run: |
           set -euo pipefail
-          IPK_LIST="devices/${{ matrix.device }}/ipk-urls.txt"
-          envsubst < devices/${{ matrix.device }}/ipk-urls.txt.tpl > $IPK_LIST
+          IPK_LIST="devices/${{ matrix.directory }}/ipk-urls.txt"
+          envsubst < devices/${{ matrix.directory }}/ipk-urls.txt.tpl > $IPK_LIST
           if [ -f "$IPK_LIST" ]; then
             while read -r url; do
               [ -z "${url:-}" ] && continue
@@ -166,7 +166,7 @@ jobs:
             done < "$IPK_LIST"
 
           else
-            echo "No ipk-urls.txt for ${{ matrix.device }} (skipping custom IPKs)"
+            echo "No ipk-urls.txt for ${{ matrix.directory }} (skipping custom IPKs)"
           fi
 
       - name: Build firmware
@@ -178,15 +178,15 @@ jobs:
       - name: Collect firmware
         run: |
           set -euo pipefail
-          mkdir -p output/${{ matrix.device }}
-          cp -a imagebuilder/bin/targets/*/* output/${{ matrix.device }}/
-          rm -rf output/${{ matrix.device }}/packages || true
+          mkdir -p output/${{ matrix.directory }}
+          cp -a imagebuilder/bin/targets/*/* output/${{ matrix.directory }}/
+          rm -rf output/${{ matrix.directory }}/packages || true
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ steps.tag.outputs.release_tag }}
-          path: output/${{ matrix.device }}
+          path: output/${{ matrix.directory }}
 
       - name: Upload firmware to release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
@@ -196,7 +196,7 @@ jobs:
         with:
           tag_name: ${{ steps.tag.outputs.release_tag }}
           body_path: release.txt
-          files: output/${{ matrix.device }}/*/*
+          files: output/${{ matrix.directory }}/*/*
 
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@main
@@ -210,6 +210,6 @@ jobs:
         with:
           keep_latest: 5
           delete_tags: true
-          delete_tag_pattern: ${{ matrix.device }}-${{ env.OPENWRT_VERSION }}.*
+          delete_tag_pattern: ${{ matrix.directory }}-${{ env.OPENWRT_VERSION }}.*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
