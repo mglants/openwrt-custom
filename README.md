@@ -1,39 +1,57 @@
-**English** | [中文](https://p3terx.com/archives/build-openwrt-with-github-actions.html)
+<!---
+NOTE: AUTO-GENERATED FILE
+to edit this file, instead edit its template at: ./ci/templates/README.md.j2
+-->
+<div align="center">
 
-# Actions-OpenWrt
 
-[![LICENSE](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square&label=LICENSE)](https://github.com/P3TERX/Actions-OpenWrt/blob/master/LICENSE)
-![GitHub Stars](https://img.shields.io/github/stars/P3TERX/Actions-OpenWrt.svg?style=flat-square&label=Stars&logo=github)
-![GitHub Forks](https://img.shields.io/github/forks/P3TERX/Actions-OpenWrt.svg?style=flat-square&label=Forks&logo=github)
+## OpenWrt Firmwares
 
-A template for building OpenWrt with GitHub Actions
+_Collection of firmwares for routers to fight against censorship_
 
-## Usage
+</div>
 
-- Click the [Use this template](https://github.com/P3TERX/Actions-OpenWrt/generate) button to create a new repository.
-- Generate `.config` files using [Lean's OpenWrt](https://github.com/coolsnowwolf/lede) source code. ( You can change it through environment variables in the workflow file. )
-- Push `.config` file to the GitHub repository.
-- Select `Build OpenWrt` on the Actions page.
-- Click the `Run workflow` button.
-- When the build is complete, click the `Artifacts` button in the upper right corner of the Actions page to download the binaries.
+<div align="center">
 
-## Tips
+![GitHub Repo stars](https://img.shields.io/github/stars/mglants/openwrt-custom?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/mglants/openwrt-custom?style=for-the-badge)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/mglants/openwrt-custom/scheduled-release.yaml?style=for-the-badge&label=Scheduled%20Release)
 
-- It may take a long time to create a `.config` file and build the OpenWrt firmware. Thus, before create repository to build your own firmware, you may check out if others have already built it which meet your needs by simply [search `Actions-Openwrt` in GitHub](https://github.com/search?q=Actions-openwrt).
-- Add some meta info of your built firmware (such as firmware architecture and installed packages) to your repository introduction, this will save others' time.
+</div>
 
-## Credits
+---
 
-- [Microsoft Azure](https://azure.microsoft.com)
-- [GitHub Actions](https://github.com/features/actions)
-- [OpenWrt](https://github.com/openwrt/openwrt)
-- [coolsnowwolf/lede](https://github.com/coolsnowwolf/lede)
-- [Mikubill/transfer](https://github.com/Mikubill/transfer)
-- [softprops/action-gh-release](https://github.com/softprops/action-gh-release)
-- [Mattraks/delete-workflow-runs](https://github.com/Mattraks/delete-workflow-runs)
-- [dev-drprasad/delete-older-releases](https://github.com/dev-drprasad/delete-older-releases)
-- [peter-evans/repository-dispatch](https://github.com/peter-evans/repository-dispatch)
+## About
 
-## License
+This repository contains a custom **OpenWrt firmware** focused on reliability, reproducibility, and autonomous operation in constrained network environments.
+The goal is to provide a ready-to-use system that requires minimal user configuration while remaining flexible and maintainable over time.
 
-[MIT](https://github.com/P3TERX/Actions-OpenWrt/blob/main/LICENSE) © [**P3TERX**](https://p3terx.com)
+- Nikki is main software for VLESS subscriptions
+- Some packages are added to make VPN tunnels
+- Minimal software packs for routers
+- For LTE/4G routers software are included
+- No custom build or kernel, just repacking
+- Suggestions are welcomed
+
+The firmware includes a curated set of networking and management packages:
+
+- `nikki`
+- `luci-app-nikki`
+- `luci`
+- `kmod-amneziawg`
+- `luci-proto-amneziawg`
+- `amneziawg-tools`
+- `luci-proto-wireguard`
+- `wireguard-tools`
+
+---
+
+
+### Firmwares
+
+Router | OpenWrt | Packages | Release
+--- | --- | --- | ---
+**ax3000t** | v24.10.5 | [8 packages](https://github.com/mglants/openwrt-custom/blob/main/devices/ax3000t/packages.txt) | —
+**ax6s** | v24.10.5 | [8 packages](https://github.com/mglants/openwrt-custom/blob/main/devices/ax6s/packages.txt) | —
+**netisn6** | v24.10.5 | [21 packages](https://github.com/mglants/openwrt-custom/blob/main/devices/netisn6/packages.txt) | —
+**wr3000h** | v24.10.5 | [8 packages](https://github.com/mglants/openwrt-custom/blob/main/devices/wr3000h/packages.txt) | —
