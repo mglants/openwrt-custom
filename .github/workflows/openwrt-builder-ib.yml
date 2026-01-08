@@ -36,7 +36,7 @@ jobs:
 
   build:
     runs-on: arc-runner-set-openwrt-custom
-    if: fromJson(needs.discover-devices.outputs.devices).include[0] != null
+    if: fromJson(needs.discover-devices.outputs.devices).directory[0] != null
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.discover-devices.outputs.devices) }}
