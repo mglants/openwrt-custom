@@ -2,6 +2,12 @@ name: OpenWrt Firmware (ImageBuilder)
 
 on:
   workflow_dispatch:
+    inputs:
+      select:
+        description: "Select device to build"
+        required: false
+        default: ""
+        type: string
   push:
     paths:
       - "devices/**"
@@ -19,17 +25,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Discover devices
+      - name: Find devices
+        id: discover
         uses: mirceanton/action-folder-matrix@510538fe18f90e23766215b5f856a516ec5739bc
-        id: scan
         with:
-          path: './devices'
+          path: ./devices
+          changed-only: ${{ github.event_name != 'workflow_dispatch' }}
+          filter: ${{ inputs.select }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: arc-runner-set-openwrt-custom
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.discover-containers.outputs.devices) }}
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
