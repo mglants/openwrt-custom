@@ -11,22 +11,24 @@ env:
   TZ: Europe/Moscow
 
 jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: set-matrix
+        run: |
+          devices=$(ls -d devices/*/ | xargs -n 1 basename)
+          json=$(printf '%s\n' "$devices" | jq -R . | jq -s .)
+          echo "matrix={\"device\":$json}" >> $GITHUB_OUTPUT
+
   build:
     runs-on: arc-runner-set-openwrt-custom
     strategy:
       fail-fast: false
-      matrix:
-        device:
-          - ax6s
-          - wr3000h
-          - netisn6
-          # - ax3000t
-          # - ax6000
-          # - bpi3mini
-          # - bpi4
-          # - netisn6
-          # - rb5009
-
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
