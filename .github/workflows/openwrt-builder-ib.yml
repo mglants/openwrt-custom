@@ -17,10 +17,10 @@ env:
   TZ: Europe/Moscow
 
 jobs:
-  discover:
+  discover-devices:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.scan.outputs.matrix }}
+      devices: ${{ steps.discover.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,9 +36,10 @@ jobs:
 
   build:
     runs-on: arc-runner-set-openwrt-custom
+    if: fromJson(needs.discover-devices.outputs.devices).directory[0] != null
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.discover-containers.outputs.directory) }}
+      matrix: ${{ fromJson(needs.discover-devices.outputs.devices) }}
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
