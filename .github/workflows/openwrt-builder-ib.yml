@@ -5,7 +5,7 @@ on:
   push:
     paths:
       - "devices/**"
-      - ".github/workflows/firmware-imagebuilder.yml"
+      - ".github/workflows/openwrt-builder-ib.yml"
 
 env:
   TZ: Europe/Moscow
