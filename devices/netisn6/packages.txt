@@ -1,0 +1,16 @@
+nikki
+luci-app-nikki
+luci
+luci-proto-xmm
+luci-proto-mbim
+luci-proto-qmi
+atinout
+luci-app-atinout
+modeminfo
+modeminfo-serial-fibocom
+modeminfo-serial-xmm
+modeminfo-serial-dell
+modeminfo-qmi
+luci-app-modeminfo
+luci-app-ttl
+luci-app-smstools3

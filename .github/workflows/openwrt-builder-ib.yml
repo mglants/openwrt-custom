@@ -19,6 +19,7 @@ jobs:
         device:
           - ax6s
           - wr3000h
+          - netisn6
           # - ax3000t
           # - ax6000
           # - bpi3mini
@@ -130,7 +131,8 @@ jobs:
           export OPENWRT_VERSION="${{ env.OPENWRT_VERSION }}"
           export OPENWRT_VERSION_MAJOR="${{ env.OPENWRT_VERSION_MAJOR }}"
           export OPKG_ARCH="${{ env.OPKG_ARCH }}"
-          envsubst '${OPENWRT_VERSION_MAJOR} ${OPKG_ARCH}' < "$FEEDS_TPL" > imagebuilder/customfeeds.conf
+          export SUBTARGET="${{ env.SUBTARGET }}"
+          envsubst '${OPENWRT_VERSION} ${OPENWRT_VERSION_MAJOR} ${OPKG_ARCH} ${SUBTARGET}' < "$FEEDS_TPL" > imagebuilder/customfeeds.conf
 
           echo "=== customfeeds.conf ==="
           cat imagebuilder/customfeeds.conf

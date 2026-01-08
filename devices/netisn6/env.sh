@@ -14,6 +14,24 @@
 #
 
 set -euo pipefail
-
+OPENWRT_CHANNEL="release"
 # renovate: datasource=git-tags depName=https://github.com/openwrt/openwrt.git
 OPENWRT_VERSION="v24.10.5"
+
+TARGET="ramips"
+SUBTARGET="mt7621"
+
+# Must match an ImageBuilder PROFILE exactly
+PROFILE="netis_n6"
+# -----------------------------------------------------------------------------
+# opkg feed architecture
+# -----------------------------------------------------------------------------
+# This must match the directory name in your binary feed
+OPKG_ARCH="mipsel_24kc"
+
+# -----------------------------------------------------------------------------
+# Optional metadata (not required by the workflow, but useful later)
+# -----------------------------------------------------------------------------
+DEVICE_NAME="n6"
+DEVICE_VENDOR="netis"
+DEVICE_MODEL="netis-n6"
