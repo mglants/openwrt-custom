@@ -36,6 +36,7 @@ jobs:
 
   build:
     runs-on: arc-runner-set-openwrt-custom
+    needs: discover-devices
     if: fromJson(needs.discover-devices.outputs.devices).directory[0] != null
     strategy:
       fail-fast: false
