@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         device:
-          # - ax6s
+          - ax6s
           - wr3000h
           # - ax3000t
           # - ax6000
@@ -29,6 +29,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Detect changes for device
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            device:
+              - devices/${{ matrix.device }}/**
+
+      - name: Stop if device not changed
+        if: steps.changes.outputs.device != 'true'
+        run: |
+          echo "No changes for ${{ matrix.device }}, skipping build."
+          exit 0
 
       - name: Install helpers
         run: |
