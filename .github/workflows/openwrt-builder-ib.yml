@@ -38,7 +38,7 @@ jobs:
     runs-on: arc-runner-set-openwrt-custom
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.discover-containers.outputs.devices) }}
+      matrix: ${{ fromJson(needs.discover-containers.outputs.directory) }}
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
