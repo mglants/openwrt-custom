@@ -43,14 +43,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Detect changes for device
-        id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
-        with:
-          filters: |
-            device:
-              - devices/${{ matrix.device }}/**
-
       - name: Stop if device not changed
         if: steps.changes.outputs.device != 'true'
         run: |
