@@ -11,24 +11,25 @@ env:
   TZ: Europe/Moscow
 
 jobs:
-  generate-matrix:
+  discover:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.scan.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - id: set-matrix
-        run: |
-          devices=$(ls -d devices/*/ 2>/dev/null | xargs -n 1 basename)
-          json=$(printf '%s\n' $devices | jq -R . | jq -cs .)
-          echo "matrix={\"device\":$json}" >> "$GITHUB_OUTPUT"
+      - name: Discover devices
+        uses: mirceanton/action-folder-matrix@v1
+        id: scan
+        with:
+          path: './devices'
 
   build:
     runs-on: arc-runner-set-openwrt-custom
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
