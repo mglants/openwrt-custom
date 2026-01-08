@@ -51,23 +51,7 @@ The firmware includes a curated set of networking and management packages:
 
 Vendor | Router | OpenWrt | Packages | Release
 --- | --- | --- | --- | ---
-cudy |
-**wr3000h** |
-v24.10.5 |
-[8](https://github.com/mglants/glantswrt/blob/main/devices/wr3000h/packages.txt) |
-—
-netis |
-**n6** |
-v24.10.5 |
-[21](https://github.com/mglants/glantswrt/blob/main/devices/netisn6/packages.txt) |
-—
-xiaomi |
-**ax3000t** |
-v24.10.5 |
-[8](https://github.com/mglants/glantswrt/blob/main/devices/ax3000t/packages.txt) |
-—
-xiaomi |
-**ax6s** |
-v24.10.5 |
-[8](https://github.com/mglants/glantswrt/blob/main/devices/ax6s/packages.txt) |
-—
+cudy | **wr3000h** | v24.10.5 | [8](https://github.com/mglants/glantswrt/blob/main/devices/wr3000h/packages.txt) | [download](https://github.com/mglants/glantswrt/releases?q=wr3000h-&expanded=true)
+netis | **n6** | v24.10.5 | [21](https://github.com/mglants/glantswrt/blob/main/devices/netisn6/packages.txt) | [download](https://github.com/mglants/glantswrt/releases?q=netisn6-&expanded=true)
+xiaomi | **ax3000t** | v24.10.5 | [8](https://github.com/mglants/glantswrt/blob/main/devices/ax3000t/packages.txt) | [download](https://github.com/mglants/glantswrt/releases?q=ax3000t-&expanded=true)
+xiaomi | **ax6s** | v24.10.5 | [8](https://github.com/mglants/glantswrt/blob/main/devices/ax6s/packages.txt) | [download](https://github.com/mglants/glantswrt/releases?q=ax6s-&expanded=true)
