@@ -27,7 +27,7 @@ jobs:
 
       - name: Find devices
         id: discover
-        uses: mirceanton/action-folder-matrix@510538fe18f90e23766215b5f856a516ec5739bc
+        uses: mirceanton/action-folder-matrix@4ccc1fcd547cf42c3b08d2d241d6ab46942c5a94
         with:
           path: ./devices
           changed-only: ${{ github.event_name != 'workflow_dispatch' }}
