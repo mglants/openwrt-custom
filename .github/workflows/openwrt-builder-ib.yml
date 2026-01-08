@@ -209,7 +209,7 @@ jobs:
           echo "${{ steps.release.outputs.url }}" > "firmwares/${{ matrix.directory }}/last.url"
 
       - name: Commit Changes
-        if: steps.tag.outputs.status == 'success' && !cancelled() && steps.changes.outputs.device == 'true'
+        if: steps.tag.outputs.status == 'success' && !cancelled()
         uses: planetscale/ghcommit-action@25309d8005ac7c3bcd61d3fe19b69e0fe47dbdde # v0.2.20
         with:
           commit_message: "chore: update last.url"
