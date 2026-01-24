@@ -51,6 +51,8 @@ The firmware includes a curated set of networking and management packages:
 
 Vendor | Router | OpenWrt | Packages | Release
 --- | --- | --- | --- | ---
+cudy | **tr3000(TR30)** | v24.10.5 | [22](https://github.com/mglants/glantswrt/blob/main/devices/tr3000/packages.txt) | [download](https://github.com/mglants/glantswrt/releases?q=tr3000-&expanded=true)
+cudy | **wr3000(WBR3000UAX)** | v24.10.5 | [8](https://github.com/mglants/glantswrt/blob/main/devices/wr3000/packages.txt) | [download](https://github.com/mglants/glantswrt/releases?q=wr3000-&expanded=true)
 cudy | **wr3000h** | v24.10.5 | [8](https://github.com/mglants/glantswrt/blob/main/devices/wr3000h/packages.txt) | [download](https://github.com/mglants/glantswrt/releases?q=wr3000h-&expanded=true)
 cudy | **wr3000s** | v24.10.5 | [8](https://github.com/mglants/glantswrt/blob/main/devices/wr3000s/packages.txt) | [download](https://github.com/mglants/glantswrt/releases?q=wr3000s-&expanded=true)
 netis | **n6** | v24.10.5 | [21](https://github.com/mglants/glantswrt/blob/main/devices/netisn6/packages.txt) | [download](https://github.com/mglants/glantswrt/releases?q=netisn6-&expanded=true)
